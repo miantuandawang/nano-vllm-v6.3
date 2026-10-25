@@ -1,0 +1,107 @@
+--- a/bench.py
++++ b/bench.py
+@@ -9,7 +9,7 @@
+     p = parser()
+     p.add_argument('--prompts-json', help='JSON list of raw strings or token-ID lists')
+     p.add_argument('--requests', type=int, default=32)
+-    p.add_argument('--output', default='benchmark-v62.json')
++    p.add_argument('--output', default='benchmark-v63.json')
+     args = p.parse_args()
+     from nanovllm import LLM, SamplingParams
+     import torch
+--- a/example.py
++++ b/example.py
+@@ -4,12 +4,12 @@
+ 
+ 
+ def parser():
+-    p = argparse.ArgumentParser(description='nano-vllm V6.2: adaptive single-GPU speculative decode')
++    p = argparse.ArgumentParser(description='nano-vllm V6.3: adaptive single-GPU speculative decode')
+     p.add_argument('--target-model', default='/models/Qwen3-14B')
+     p.add_argument('--draft-model', default='/models/Qwen3-0.6B')
+     p.add_argument('--batch', type=int, default=128)
+-    p.add_argument('--max-active-seqs', type=int, default=128,
+-                   help='resident-request cap; default: 128, also bounded by Target KV capacity')
++    p.add_argument('--max-active-seqs', type=int, default=372,
++                   help='resident-request cap; default: 372, also bounded by Target KV capacity')
+     p.add_argument('--target-only-threshold', type=int, default=16)
+     p.add_argument('--target-kv-cache-gib', type=float, default=28)
+     p.add_argument('--draft-kv-cache-gib', type=float, default=8)
+--- a/nanovllm/__init__.py
++++ b/nanovllm/__init__.py
+@@ -1,7 +1,7 @@
+ from nanovllm.config import EngineConfig, Config
+ from nanovllm.sampling_params import SamplingParams
+ 
+-__version__ = '0.6.2'
++__version__ = '0.6.3'
+ __all__ = ['LLM', 'EngineConfig', 'Config', 'SamplingParams']
+ 
+ 
+--- a/nanovllm/config.py
++++ b/nanovllm/config.py
+@@ -8,7 +8,7 @@
+     draft_model: str = '/models/Qwen3-0.6B'
+     batch: int = 128
+     # None: resident requests are bounded by Target KV capacity, not dispatch B.
+-    max_active_seqs: int | None = 128
++    max_active_seqs: int | None = 372
+     target_only_threshold: int = 16
+     max_model_len: int = 4096
+     max_num_batched_tokens: int = 4096
+--- a/nanovllm/engine/llm_engine.py
++++ b/nanovllm/engine/llm_engine.py
+@@ -31,18 +31,18 @@
+         self.target_runner = self.draft_runner = None
+         self._last_budget_warning = 0.0
+         if dist.is_initialized() and dist.get_world_size() != 1:
+-            raise ValueError('V6.2 requires one GPU and TP=1')
++            raise ValueError('V6.3 requires one GPU and TP=1')
+         torch.cuda.set_device(c.device)
+         name = torch.cuda.get_device_name(c.device)
+         if 'A100' not in name:
+-            warnings.warn(f'V6.2 is designed for one A100; current device is {name}')
++            warnings.warn(f'V6.3 is designed for one A100; current device is {name}')
+         dtype = getattr(torch, c.dtype)
+         configs = []
+         for role in ('target', 'draft'):
+             path = str(Path(getattr(c, role + '_model')).expanduser().resolve())
+             hf = AutoConfig.from_pretrained(path, local_files_only=True)
+             if hf.model_type != 'qwen3':
+-                raise ValueError('V6.2 supports Qwen3 models')
++                raise ValueError('V6.3 supports Qwen3 models')
+             hf.dtype = dtype
+             c.max_model_len = min(c.max_model_len, hf.max_position_embeddings)
+             configs.append(SimpleNamespace(name=role, model=path, hf_config=hf,
+--- a/nanovllm/engine/model_runner.py
++++ b/nanovllm/engine/model_runner.py
+@@ -92,7 +92,7 @@
+                 module.k_cache = self.kv_cache[0, layer]
+                 module.v_cache = self.kv_cache[1, layer]
+                 layer += 1
+-        print(f'[V6.2 KV] {config.name}: {total * kv_block_bytes(config) / GIB:.3f} GiB, '
++        print(f'[V6.3 KV] {config.name}: {total * kv_block_bytes(config) / GIB:.3f} GiB, '
+               f'{self.num_blocks} usable pages + {scratch} scratch', flush=True)
+ 
+     def capture_graphs(self):
+--- a/nanovllm/sampling_params.py
++++ b/nanovllm/sampling_params.py
+@@ -9,6 +9,6 @@
+ 
+     def __post_init__(self):
+         if self.temperature != 0:
+-            raise ValueError('V6.2 implements greedy speculative decoding only (temperature=0)')
++            raise ValueError('V6.3 implements greedy speculative decoding only (temperature=0)')
+         if self.max_tokens < 0:
+             raise ValueError('max_tokens must be nonnegative')
+--- a/pyproject.toml
++++ b/pyproject.toml
+@@ -4,7 +4,7 @@
+ 
+ [project]
+ name = "nano-vllm"
+-version = "0.6.2"
++version = "0.6.3"
+ authors = [{ name = "Xingkai Yu" }]
+ license = "MIT"
+ license-files = ["LICENSE"]

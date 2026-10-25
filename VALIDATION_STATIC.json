@@ -1,0 +1,21 @@
+{
+  "version": "0.6.3",
+  "date": "2026-10-24",
+  "python_syntax_files": 30,
+  "configuration_check": {
+    "version": "0.6.3",
+    "default_max_active_seqs": 372,
+    "default_batch": 128,
+    "api_cli_defaults_match": true
+  },
+  "inherited_algorithms_unchanged": {
+    "nanovllm/engine/scheduler.py": true,
+    "nanovllm/engine/block_manager.py": true,
+    "nanovllm/engine/graph_methods.py": true,
+    "nanovllm/engine/eager_methods.py": true
+  },
+  "cpu_state_machine_tests": "not run",
+  "cuda_tests": "not run",
+  "benchmarks": "not run",
+  "colab_actions": "none"
+}

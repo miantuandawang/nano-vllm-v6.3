@@ -1,0 +1,9 @@
+{
+  "version": "0.6.2",
+  "date": "2026-10-24",
+  "reason": "User explicitly requested no testing",
+  "cpu_tests": "not run",
+  "cuda_tests": "not run",
+  "benchmarks": "not run",
+  "colab_actions": "none"
+}

@@ -1,0 +1,147 @@
+{
+  "upstream": "https://github.com/GeeeekExplorer/nano-vllm",
+  "upstream_commit": "bb823b3e06983d71485a8e1f23715ebd87d98ef8",
+  "v51_source": "C:\\Users\\44368\\Documents\\ChatGPT\\代码\\work\\v51-specbench-b2-20261022\\source",
+  "reused_graph_methods": [
+    "_set_verify_graph_context",
+    "capture_verify_graphs",
+    "prepare_verify_graph_inputs",
+    "replay_verify_graph",
+    "_set_catchup_graph_context",
+    "capture_catchup_graphs",
+    "prepare_catchup_graph_inputs",
+    "replay_catchup_graph",
+    "capture_cudagraph",
+    "prepare_decode",
+    "replay_decode_graph"
+  ],
+  "reused_memory_functions": [
+    "gib_to_bytes",
+    "kv_block_bytes",
+    "fixed_kv_blocks",
+    "estimate_weight_bytes"
+  ],
+  "v51_sha256": {
+    "nanovllm/engine/model_runner.py": "73df1f4ac937708d443003570c37e5b9dcb6a5843fc03721f512a173b5b998d9",
+    "nanovllm/utils/memory_budget.py": "fa3877cdeb4e9656c0be495cbdb55e69cc63f0b0189a4a609f7106c06647f0c8",
+    "nanovllm/models/qwen3.py": "be9853b730e974e87f138b702123ea6c18cfffbeefd32711718b5df1ca96acb9",
+    "nanovllm/layers/embed_head.py": "e4b36342c063fe9d41c5572cf4ea5d8aad4548cc39d86ee47c064de48158481f",
+    "tests/test_draft_graphs.py": "c03013135adc5a306c9b195672ea7ef4d91677c96ee70941dc7c69847a43a6ea",
+    "nanovllm/engine/block_manager.py": "251a16a72be7a715c553a3665003eaeb092be8ac1517726365650e06cff49225"
+  },
+  "graph_methods_unchanged_ast": [
+    "_set_verify_graph_context",
+    "capture_verify_graphs",
+    "prepare_verify_graph_inputs",
+    "replay_verify_graph",
+    "_set_catchup_graph_context",
+    "capture_catchup_graphs",
+    "prepare_catchup_graph_inputs",
+    "replay_catchup_graph",
+    "replay_decode_graph"
+  ],
+  "adaptations": {
+    "capture_cudagraph / prepare_decode": "Dummy rows use read-only scratch and context_len=1; real-row packing unchanged.",
+    "_predict": "Added project=False to append KV without LM head; packing and projection behavior otherwise unchanged.",
+    "Qwen3 / LM head": "V5.1 all_positions projection; TP=1 works without initializing distributed.",
+    "BlockManager": "V5.1 exclusive reserve/truncate/deallocate policy, with transaction rollback helpers.",
+    "lifecycle": "New shared-process initialization and one aggregate allocator limit; per-worker V5.1 caps not reused."
+  },
+  "v61": {
+    "base": "V6.0",
+    "version": "0.6.1",
+    "date": "2026-10-24",
+    "changed_files": [
+      "bench.py",
+      "example.py",
+      "nanovllm/__init__.py",
+      "nanovllm/config.py",
+      "nanovllm/engine/llm_engine.py",
+      "nanovllm/engine/model_runner.py",
+      "nanovllm/engine/scheduler.py",
+      "nanovllm/engine/sequence.py",
+      "nanovllm/sampling_params.py",
+      "pyproject.toml",
+      "README.md",
+      "tests/test_scheduler.py",
+      "VALIDATION_CPU.json"
+    ],
+    "new_files": [
+      "CHANGES_6.1.md",
+      "tests/test_lazy_draft.py",
+      "tests/validate_lazy_cuda.py",
+      "V6.0_BASE_SHA256.json",
+      "V6.0_README.md",
+      "VALIDATION_CUDA.json",
+      "VALIDATION_CUDA.log"
+    ],
+    "unchanged_execution_files": [
+      "nanovllm/engine/graph_methods.py",
+      "nanovllm/engine/eager_methods.py",
+      "nanovllm/engine/block_manager.py",
+      "nanovllm/layers/attention.py"
+    ],
+    "changes": [
+      "independent max_active_seqs, memory-bounded Target admission",
+      "request Draft KV allocation/Prefill/catch-up only after speculative selection"
+    ]
+  },
+  "v62": {
+    "base": "V6.1",
+    "version": "0.6.2",
+    "changed_files": [
+      "bench.py",
+      "example.py",
+      "nanovllm/__init__.py",
+      "nanovllm/config.py",
+      "nanovllm/engine/llm_engine.py",
+      "nanovllm/engine/model_runner.py",
+      "nanovllm/sampling_params.py",
+      "pyproject.toml",
+      "README.md",
+      "tests/test_graphs.py"
+    ],
+    "new_files": [
+      "CHANGES_6.2.md",
+      "TESTING_NOT_RUN.json",
+      "V6.1_BASE_SHA256.json",
+      "V6.1_README.md"
+    ],
+    "target_decode_buckets": [
+      1,
+      2,
+      4,
+      8,
+      16,
+      32,
+      48,
+      64,
+      80,
+      96,
+      112,
+      128
+    ],
+    "default_batch": 128,
+    "default_max_active_seqs": 128,
+    "tests": "not run at user request"
+  },
+  "v63": {
+    "base": "V6.2",
+    "version": "0.6.3",
+    "default_max_active_seqs": 372,
+    "default_batch": 128,
+    "target_decode_graph_max_batch": 128,
+    "changed_code_files": [
+      "bench.py",
+      "example.py",
+      "nanovllm/__init__.py",
+      "nanovllm/config.py",
+      "nanovllm/engine/llm_engine.py",
+      "nanovllm/engine/model_runner.py",
+      "nanovllm/sampling_params.py",
+      "pyproject.toml"
+    ],
+    "validation": "VALIDATION_STATIC.json",
+    "performance_measured": false
+  }
+}
